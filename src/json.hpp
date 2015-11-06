@@ -83,19 +83,20 @@ namespace nlohmann
 */
 namespace
 {
-/*!
-@brief Helper to determine whether there's a key_type for T.
-@sa http://stackoverflow.com/a/7728728/266378
-*/
+/// Helper for SFINAE tests that can "sink" any type
 template<typename T>
+using sink_type = void;
+
+/// Helper to determine whether there's a key_type for T.
+template<typename T, typename V=void>
 struct has_mapped_type
-{
-  private:
-    template<typename C> static char test(typename C::mapped_type*);
-    template<typename C> static int  test(...);
-  public:
-    enum { value = sizeof(test<T>(0)) == sizeof(char) };
-};
+    : std::false_type
+{};
+
+template<typename T>
+struct has_mapped_type<T, sink_type<typename T::mapped_type>>
+    : std::true_type
+{};
 
 /// "equality" comparison for floating point numbers
 template<typename T>
